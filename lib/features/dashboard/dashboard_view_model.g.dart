@@ -3,7 +3,7 @@
 part of 'dashboard_view_model.dart';
 
 // **************************************************************************
-// RiverPodGenerator
+// RiverpodGenerator
 // **************************************************************************
 
 String _$dashboardViewModelHash() =>

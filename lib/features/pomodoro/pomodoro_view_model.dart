@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter/widgets.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'pomodoro_repository.dart';
 import '../../core/database/app_database.dart';
 import '../../core/notifications/notification_service.dart';
@@ -54,7 +56,7 @@ class PomodoroState {
   }
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 class PomodoroViewModel extends _$PomodoroViewModel {
   Timer? _timer;
   Duration _customFocusDuration = const Duration(minutes: 25);
@@ -62,9 +64,16 @@ class PomodoroViewModel extends _$PomodoroViewModel {
 
   @override
   PomodoroState build() {
+    final observer = _LifecycleObserver(this);
+    WidgetsBinding.instance.addObserver(observer);
+    
     ref.onDispose(() {
+      WidgetsBinding.instance.removeObserver(observer);
       _timer?.cancel();
     });
+    
+    _loadState();
+
     return PomodoroState(
       mode: FocusMode.pomodoro,
       pomodoroPhase: PomodoroPhase.focus,
@@ -91,21 +100,20 @@ class PomodoroViewModel extends _$PomodoroViewModel {
   int get customBreakMins => _customBreakDuration.inMinutes;
 
   void setMode(FocusMode mode) {
-    if (state.isRunning) {
-      stopSession();
-    }
+    if (state.mode == mode) return;
+
     Duration limit = Duration.zero;
     if (mode == FocusMode.pomodoro) {
-      limit = _customFocusDuration;
+      limit = state.pomodoroPhase == PomodoroPhase.focus
+          ? _customFocusDuration
+          : _customBreakDuration;
     }
-    state = PomodoroState(
+    
+    state = state.copyWith(
       mode: mode,
-      pomodoroPhase: PomodoroPhase.focus,
-      pomodoroSession: 1,
-      isRunning: false,
       durationLimit: limit,
-      elapsedDuration: Duration.zero,
     );
+    _saveState();
   }
 
   void startSession() {
@@ -135,6 +143,7 @@ class PomodoroViewModel extends _$PomodoroViewModel {
     }
 
     _startTimer();
+    _saveState();
   }
 
   void pauseSession() {
@@ -142,6 +151,7 @@ class PomodoroViewModel extends _$PomodoroViewModel {
     _timer?.cancel();
     ref.read(notificationServiceProvider).cancelNotification(9999);
     state = state.copyWith(isRunning: false);
+    _saveState();
   }
 
   void stopSession({bool forceSave = true}) {
@@ -206,6 +216,7 @@ class PomodoroViewModel extends _$PomodoroViewModel {
       sessionStart: null,
       lastTickTime: null,
     );
+    _saveState();
   }
 
   void skipSession() {
@@ -233,6 +244,7 @@ class PomodoroViewModel extends _$PomodoroViewModel {
         elapsedDuration: Duration.zero,
       );
     }
+    _saveState();
   }
 
   void handleLifecycleChange(bool resumed) {
@@ -264,6 +276,7 @@ class PomodoroViewModel extends _$PomodoroViewModel {
     } else {
       _timer?.cancel();
       state = state.copyWith(lastTickTime: DateTime.now());
+      _saveState();
     }
   }
 
@@ -329,5 +342,91 @@ class PomodoroViewModel extends _$PomodoroViewModel {
         elapsedDuration: Duration.zero,
       );
     }
+    _saveState();
+  }
+
+  Future<void> _loadState() async {
+    final prefs = await SharedPreferences.getInstance();
+    final isRunning = prefs.getBool('pomodoro_isRunning') ?? false;
+    final modeStr = prefs.getString('pomodoro_mode') ?? 'pomodoro';
+    final phaseStr = prefs.getString('pomodoro_phase') ?? 'focus';
+    final session = prefs.getInt('pomodoro_session') ?? 1;
+    final elapsedSecs = prefs.getInt('pomodoro_elapsed') ?? 0;
+    final sessionStartStr = prefs.getString('pomodoro_sessionStart');
+    final lastTickTimeStr = prefs.getString('pomodoro_lastTickTime');
+    
+    final mode = FocusMode.values.firstWhere((e) => e.name == modeStr, orElse: () => FocusMode.pomodoro);
+    final phase = PomodoroPhase.values.firstWhere((e) => e.name == phaseStr, orElse: () => PomodoroPhase.focus);
+    
+    Duration limit = Duration.zero;
+    if (mode == FocusMode.pomodoro) {
+      limit = phase == PomodoroPhase.focus ? _customFocusDuration : _customBreakDuration;
+    }
+    
+    DateTime? sessionStart = sessionStartStr != null ? DateTime.tryParse(sessionStartStr) : null;
+    DateTime? lastTickTime = lastTickTimeStr != null ? DateTime.tryParse(lastTickTimeStr) : null;
+    
+    Duration elapsed = Duration(seconds: elapsedSecs);
+    
+    if (isRunning && lastTickTime != null) {
+      final now = DateTime.now();
+      final delta = now.difference(lastTickTime);
+      elapsed += delta;
+      lastTickTime = now;
+      
+      if (mode == FocusMode.pomodoro && elapsed >= limit) {
+        elapsed = limit;
+      }
+    }
+    
+    state = PomodoroState(
+      mode: mode,
+      pomodoroPhase: phase,
+      pomodoroSession: session,
+      isRunning: isRunning,
+      durationLimit: limit,
+      elapsedDuration: elapsed,
+      sessionStart: sessionStart,
+      lastTickTime: lastTickTime,
+    );
+    
+    if (isRunning) {
+      if (mode == FocusMode.pomodoro && elapsed >= limit) {
+        _sessionCompleted();
+      } else {
+        _startTimer();
+      }
+    }
+  }
+
+  Future<void> _saveState() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setBool('pomodoro_isRunning', state.isRunning);
+    prefs.setString('pomodoro_mode', state.mode.name);
+    prefs.setString('pomodoro_phase', state.pomodoroPhase.name);
+    prefs.setInt('pomodoro_session', state.pomodoroSession);
+    prefs.setInt('pomodoro_elapsed', state.elapsedDuration.inSeconds);
+    if (state.sessionStart != null) {
+      prefs.setString('pomodoro_sessionStart', state.sessionStart!.toIso8601String());
+    } else {
+      prefs.remove('pomodoro_sessionStart');
+    }
+    if (state.lastTickTime != null) {
+      prefs.setString('pomodoro_lastTickTime', state.lastTickTime!.toIso8601String());
+    } else {
+      prefs.remove('pomodoro_lastTickTime');
+    }
   }
 }
+
+class _LifecycleObserver extends WidgetsBindingObserver {
+  final PomodoroViewModel notifier;
+  _LifecycleObserver(this.notifier);
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    final isResumed = state == AppLifecycleState.resumed;
+    notifier.handleLifecycleChange(isResumed);
+  }
+}
+

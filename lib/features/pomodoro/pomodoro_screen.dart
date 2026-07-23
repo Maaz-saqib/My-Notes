@@ -173,9 +173,11 @@ class _PomodoroScreenState extends ConsumerState<PomodoroScreen>
                   ),
                 ],
                 selected: {timerState.mode},
-                onSelectionChanged: (selection) {
-                  notifier.setMode(selection.first);
-                },
+                onSelectionChanged: (timerState.isRunning || timerState.elapsedDuration > Duration.zero)
+                    ? null
+                    : (selection) {
+                        notifier.setMode(selection.first);
+                      },
               ),
               const SizedBox(height: 48),
               // Timer Display
