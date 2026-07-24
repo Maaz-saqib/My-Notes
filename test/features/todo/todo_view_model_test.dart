@@ -69,6 +69,8 @@ void main() {
             dueDate: null,
             colorTag: 0,
             hasReminder: false,
+            hasAlarm: false,
+            alarmSound: 'default',
           );
 
       // Assert
@@ -110,6 +112,8 @@ void main() {
             dueDate: futureDate,
             colorTag: 1,
             hasReminder: true,
+            hasAlarm: true,
+            alarmSound: 'default',
           );
 
       // Assert
@@ -135,6 +139,8 @@ void main() {
         dueDate: DateTime.now().add(const Duration(days: 1)),
         isCompleted: false,
         colorTag: 0,
+        hasAlarm: false,
+        alarmSound: 'default',
         updatedAt: DateTime.now(),
       );
 

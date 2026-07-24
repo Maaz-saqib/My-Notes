@@ -17,6 +17,8 @@ class _TodoEditorScreenState extends ConsumerState<TodoEditorScreen> {
   DateTime? _dueDate;
   TimeOfDay? _dueTime;
   bool _hasReminder = false;
+  bool _hasAlarm = false;
+  String _alarmSound = 'default';
   bool _isInitialized = false;
 
   @override
@@ -42,6 +44,8 @@ class _TodoEditorScreenState extends ConsumerState<TodoEditorScreen> {
         _dueDate = argumentTodo.dueDate;
         _dueTime = TimeOfDay.fromDateTime(argumentTodo.dueDate!);
         _hasReminder = true; // For editing convenience, assume true if dueDate exists
+        _hasAlarm = argumentTodo.hasAlarm;
+        _alarmSound = argumentTodo.alarmSound;
       }
     }
     _isInitialized = true;
@@ -103,6 +107,8 @@ class _TodoEditorScreenState extends ConsumerState<TodoEditorScreen> {
             colorTag: 0,
             isCompleted: _todo!.isCompleted,
             hasReminder: _hasReminder,
+            hasAlarm: _hasAlarm,
+            alarmSound: _alarmSound,
           );
     } else {
       // Add (passing 0 for colorTag)
@@ -111,6 +117,8 @@ class _TodoEditorScreenState extends ConsumerState<TodoEditorScreen> {
             dueDate: finalDueDate,
             colorTag: 0,
             hasReminder: _hasReminder,
+            hasAlarm: _hasAlarm,
+            alarmSound: _alarmSound,
           );
     }
 
@@ -200,6 +208,44 @@ class _TodoEditorScreenState extends ConsumerState<TodoEditorScreen> {
                           });
                         },
                       ),
+                      if (_hasReminder) ...[
+                        const Divider(height: 1),
+                        SwitchListTile(
+                          secondary: const Icon(Icons.alarm),
+                          title: const Text('Play Alarm Sound'),
+                          value: _hasAlarm,
+                          onChanged: (val) {
+                            setState(() {
+                              _hasAlarm = val;
+                            });
+                          },
+                        ),
+                        if (_hasAlarm) ...[
+                          const Divider(height: 1),
+                          ListTile(
+                            leading: const Icon(Icons.music_note),
+                            title: DropdownButtonHideUnderline(
+                              child: DropdownButton<String>(
+                                value: _alarmSound,
+                                isExpanded: true,
+                                items: const [
+                                  DropdownMenuItem(
+                                    value: 'default',
+                                    child: Text('Default Notification Sound'),
+                                  ),
+                                ],
+                                onChanged: (val) {
+                                  if (val != null) {
+                                    setState(() {
+                                      _alarmSound = val;
+                                    });
+                                  }
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
                     ],
                   ],
                 ),

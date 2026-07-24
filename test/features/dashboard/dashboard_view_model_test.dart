@@ -91,10 +91,12 @@ void main() {
       SharedPreferences.setMockInitialValues({});
       final testTodo = Todo(
         id: 1,
-        title: 'Existing Todo',
+        title: 'Test Todo',
         dueDate: null,
         isCompleted: false,
         colorTag: 0,
+        hasAlarm: false,
+        alarmSound: 'default',
         updatedAt: DateTime.now(),
       );
       when(() => mockNotesRepo.getAll()).thenAnswer((_) async => []);

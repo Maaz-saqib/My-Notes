@@ -75,6 +75,7 @@ class NotificationService {
     required String title,
     required String body,
     required DateTime scheduledTime,
+    bool playSound = true,
   }) async {
     if (scheduledTime.isBefore(DateTime.now())) return;
 
@@ -83,25 +84,26 @@ class NotificationService {
       title,
       body,
       tz.TZDateTime.from(scheduledTime, tz.local),
-      const NotificationDetails(
+      NotificationDetails(
         android: AndroidNotificationDetails(
           'tick_notes_reminders',
           'Task Reminders',
           channelDescription: 'Notifications for task due times and reminders',
           importance: Importance.max,
           priority: Priority.high,
+          playSound: playSound,
         ),
         iOS: DarwinNotificationDetails(
           presentAlert: true,
           presentBadge: true,
-          presentSound: true,
+          presentSound: playSound,
         ),
         macOS: DarwinNotificationDetails(
           presentAlert: true,
           presentBadge: true,
-          presentSound: true,
+          presentSound: playSound,
         ),
-        linux: LinuxNotificationDetails(),
+        linux: const LinuxNotificationDetails(),
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       uiLocalNotificationDateInterpretation:

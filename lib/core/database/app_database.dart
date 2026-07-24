@@ -21,6 +21,8 @@ class Todos extends Table {
   DateTimeColumn get dueDate => dateTime().nullable()();
   BoolColumn get isCompleted => boolean().withDefault(const Constant(false))();
   IntColumn get colorTag => integer().withDefault(const Constant(0))();
+  BoolColumn get hasAlarm => boolean().withDefault(const Constant(false))();
+  TextColumn get alarmSound => text().withDefault(const Constant('default'))();
   DateTimeColumn get updatedAt => dateTime()();
 }
 
@@ -45,7 +47,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -55,6 +57,10 @@ class AppDatabase extends _$AppDatabase {
         onUpgrade: (Migrator m, int from, int to) async {
           if (from < 2) {
             await m.addColumn(notes, notes.isList);
+          }
+          if (from < 3) {
+            await m.addColumn(todos, todos.hasAlarm);
+            await m.addColumn(todos, todos.alarmSound);
           }
         },
       );

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dashboard_view_model.dart';
 import 'package:tick_notes/core/onboarding/onboarding_service.dart';
 import 'package:tick_notes/features/notes/notes_list_screen.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:tick_notes/features/todo/todo_list_screen.dart';
 import 'package:tick_notes/features/pomodoro/pomodoro_screen.dart';
 import 'package:tick_notes/features/pomodoro/pomodoro_view_model.dart';
@@ -38,6 +39,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     ];
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      FlutterNativeSplash.remove();
       final shouldShow = await ref.read(dashboardViewModelProvider.notifier).shouldShowOnboarding();
       if (!shouldShow) return;
 

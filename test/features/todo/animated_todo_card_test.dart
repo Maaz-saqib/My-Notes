@@ -12,6 +12,8 @@ void main() {
         dueDate: null,
         isCompleted: false,
         colorTag: 0,
+        hasAlarm: false,
+        alarmSound: 'default',
         updatedAt: DateTime.now(),
       );
 
@@ -46,7 +48,9 @@ void main() {
         title: 'Write Widget Tests',
         dueDate: null,
         isCompleted: true,
-        colorTag: 1,
+        colorTag: 0,
+        hasAlarm: false,
+        alarmSound: 'default',
         updatedAt: DateTime.now(),
       );
 
@@ -82,6 +86,8 @@ void main() {
         dueDate: null,
         isCompleted: false,
         colorTag: 2,
+        hasAlarm: false,
+        alarmSound: 'default',
         updatedAt: DateTime.now(),
       );
 

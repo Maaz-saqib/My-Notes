@@ -93,9 +93,13 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
         );
   }
 
-  void _onChecklistChanged() {
+  void _onChecklistToggled() {
     _onTextChanged();
     setState(() {}); // trigger rebuild for UI
+  }
+
+  void _onChecklistTextChangedOnly() {
+    _onTextChanged(); // updates view model (and DB) without triggering rebuild
   }
 
   Future<Note> _createOrGetExistingNote() async {
@@ -158,7 +162,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
           title: const Text('List item'),
           onTap: () {
             _checklistItems.add(ChecklistItem(text: ''));
-            _onChecklistChanged();
+            _onChecklistToggled();
           },
         ),
         if (checked.isNotEmpty) ...[
@@ -188,7 +192,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
         value: item.isChecked,
         onChanged: (val) {
           _checklistItems[index] = item.copyWith(isChecked: val);
-          _onChecklistChanged();
+          _onChecklistToggled();
         },
       ),
       title: TextFormField(
@@ -203,14 +207,14 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
         ),
         onChanged: (val) {
           _checklistItems[index] = item.copyWith(text: val);
-          _onChecklistChanged();
+          _onChecklistTextChangedOnly();
         },
       ),
       trailing: IconButton(
         icon: const Icon(Icons.close, size: 18),
         onPressed: () {
           _checklistItems.removeAt(index);
-          _onChecklistChanged();
+          _onChecklistToggled();
         },
       ),
     );

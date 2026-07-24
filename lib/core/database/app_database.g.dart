@@ -154,11 +154,17 @@ late final GeneratedColumn<bool> isCompleted = GeneratedColumn<bool>('is_complet
 static const VerificationMeta _colorTagMeta = const VerificationMeta('colorTag');
 @override
 late final GeneratedColumn<int> colorTag = GeneratedColumn<int>('color_tag', aliasedName, false, type: DriftSqlType.int, requiredDuringInsert: false, defaultValue: const Constant(0));
+static const VerificationMeta _hasAlarmMeta = const VerificationMeta('hasAlarm');
+@override
+late final GeneratedColumn<bool> hasAlarm = GeneratedColumn<bool>('has_alarm', aliasedName, false, type: DriftSqlType.bool, requiredDuringInsert: false, defaultConstraints: GeneratedColumn.constraintIsAlways('CHECK ("has_alarm" IN (0, 1))'), defaultValue: const Constant(false));
+static const VerificationMeta _alarmSoundMeta = const VerificationMeta('alarmSound');
+@override
+late final GeneratedColumn<String> alarmSound = GeneratedColumn<String>('alarm_sound', aliasedName, false, type: DriftSqlType.string, requiredDuringInsert: false, defaultValue: const Constant('default'));
 static const VerificationMeta _updatedAtMeta = const VerificationMeta('updatedAt');
 @override
 late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>('updated_at', aliasedName, false, type: DriftSqlType.dateTime, requiredDuringInsert: true);
 @override
-List<GeneratedColumn> get $columns => [id, title, dueDate, isCompleted, colorTag, updatedAt];
+List<GeneratedColumn> get $columns => [id, title, dueDate, isCompleted, colorTag, hasAlarm, alarmSound, updatedAt];
 @override
 String get aliasedName => _alias ?? actualTableName;
 @override
@@ -176,7 +182,9 @@ context.missing(_titleMeta);
 if (data.containsKey('due_date')) {
 context.handle(_dueDateMeta, dueDate.isAcceptableOrUnknown(data['due_date']!, _dueDateMeta));}if (data.containsKey('is_completed')) {
 context.handle(_isCompletedMeta, isCompleted.isAcceptableOrUnknown(data['is_completed']!, _isCompletedMeta));}if (data.containsKey('color_tag')) {
-context.handle(_colorTagMeta, colorTag.isAcceptableOrUnknown(data['color_tag']!, _colorTagMeta));}if (data.containsKey('updated_at')) {
+context.handle(_colorTagMeta, colorTag.isAcceptableOrUnknown(data['color_tag']!, _colorTagMeta));}if (data.containsKey('has_alarm')) {
+context.handle(_hasAlarmMeta, hasAlarm.isAcceptableOrUnknown(data['has_alarm']!, _hasAlarmMeta));}if (data.containsKey('alarm_sound')) {
+context.handle(_alarmSoundMeta, alarmSound.isAcceptableOrUnknown(data['alarm_sound']!, _alarmSoundMeta));}if (data.containsKey('updated_at')) {
 context.handle(_updatedAtMeta, updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));} else if (isInserting) {
 context.missing(_updatedAtMeta);
 }
@@ -185,7 +193,7 @@ return context;
 @override
 Set<GeneratedColumn> get $primaryKey => {id};
 @override Todo map(Map<String, dynamic> data, {String? tablePrefix})  {
-final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';return Todo(id: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}id'])!, title: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}title'])!, dueDate: attachedDatabase.typeMapping.read(DriftSqlType.dateTime, data['${effectivePrefix}due_date']), isCompleted: attachedDatabase.typeMapping.read(DriftSqlType.bool, data['${effectivePrefix}is_completed'])!, colorTag: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}color_tag'])!, updatedAt: attachedDatabase.typeMapping.read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!, );
+final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';return Todo(id: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}id'])!, title: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}title'])!, dueDate: attachedDatabase.typeMapping.read(DriftSqlType.dateTime, data['${effectivePrefix}due_date']), isCompleted: attachedDatabase.typeMapping.read(DriftSqlType.bool, data['${effectivePrefix}is_completed'])!, colorTag: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}color_tag'])!, hasAlarm: attachedDatabase.typeMapping.read(DriftSqlType.bool, data['${effectivePrefix}has_alarm'])!, alarmSound: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}alarm_sound'])!, updatedAt: attachedDatabase.typeMapping.read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!, );
 }
 @override
 $TodosTable createAlias(String alias) {
@@ -196,54 +204,62 @@ final String title;
 final DateTime? dueDate;
 final bool isCompleted;
 final int colorTag;
+final bool hasAlarm;
+final String alarmSound;
 final DateTime updatedAt;
-const Todo({required this.id, required this.title, this.dueDate, required this.isCompleted, required this.colorTag, required this.updatedAt});@override
+const Todo({required this.id, required this.title, this.dueDate, required this.isCompleted, required this.colorTag, required this.hasAlarm, required this.alarmSound, required this.updatedAt});@override
 Map<String, Expression> toColumns(bool nullToAbsent) {
 final map = <String, Expression> {};map['id'] = Variable<int>(id);
 map['title'] = Variable<String>(title);
 if (!nullToAbsent || dueDate != null){map['due_date'] = Variable<DateTime>(dueDate);
 }map['is_completed'] = Variable<bool>(isCompleted);
 map['color_tag'] = Variable<int>(colorTag);
+map['has_alarm'] = Variable<bool>(hasAlarm);
+map['alarm_sound'] = Variable<String>(alarmSound);
 map['updated_at'] = Variable<DateTime>(updatedAt);
 return map; 
 }
 TodosCompanion toCompanion(bool nullToAbsent) {
-return TodosCompanion(id: Value(id),title: Value(title),dueDate: dueDate == null && nullToAbsent ? const Value.absent() : Value(dueDate),isCompleted: Value(isCompleted),colorTag: Value(colorTag),updatedAt: Value(updatedAt),);
+return TodosCompanion(id: Value(id),title: Value(title),dueDate: dueDate == null && nullToAbsent ? const Value.absent() : Value(dueDate),isCompleted: Value(isCompleted),colorTag: Value(colorTag),hasAlarm: Value(hasAlarm),alarmSound: Value(alarmSound),updatedAt: Value(updatedAt),);
 }
 factory Todo.fromJson(Map<String, dynamic> json, {ValueSerializer? serializer}) {
 serializer ??= driftRuntimeOptions.defaultSerializer;
-return Todo(id: serializer.fromJson<int>(json['id']),title: serializer.fromJson<String>(json['title']),dueDate: serializer.fromJson<DateTime?>(json['dueDate']),isCompleted: serializer.fromJson<bool>(json['isCompleted']),colorTag: serializer.fromJson<int>(json['colorTag']),updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),);}
+return Todo(id: serializer.fromJson<int>(json['id']),title: serializer.fromJson<String>(json['title']),dueDate: serializer.fromJson<DateTime?>(json['dueDate']),isCompleted: serializer.fromJson<bool>(json['isCompleted']),colorTag: serializer.fromJson<int>(json['colorTag']),hasAlarm: serializer.fromJson<bool>(json['hasAlarm']),alarmSound: serializer.fromJson<String>(json['alarmSound']),updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),);}
 @override Map<String, dynamic> toJson({ValueSerializer? serializer}) {
 serializer ??= driftRuntimeOptions.defaultSerializer;
 return <String, dynamic>{
-'id': serializer.toJson<int>(id),'title': serializer.toJson<String>(title),'dueDate': serializer.toJson<DateTime?>(dueDate),'isCompleted': serializer.toJson<bool>(isCompleted),'colorTag': serializer.toJson<int>(colorTag),'updatedAt': serializer.toJson<DateTime>(updatedAt),};}Todo copyWith({int? id,String? title,Value<DateTime?> dueDate = const Value.absent(),bool? isCompleted,int? colorTag,DateTime? updatedAt}) => Todo(id: id ?? this.id,title: title ?? this.title,dueDate: dueDate.present ? dueDate.value : this.dueDate,isCompleted: isCompleted ?? this.isCompleted,colorTag: colorTag ?? this.colorTag,updatedAt: updatedAt ?? this.updatedAt,);Todo copyWithCompanion(TodosCompanion data) {
+'id': serializer.toJson<int>(id),'title': serializer.toJson<String>(title),'dueDate': serializer.toJson<DateTime?>(dueDate),'isCompleted': serializer.toJson<bool>(isCompleted),'colorTag': serializer.toJson<int>(colorTag),'hasAlarm': serializer.toJson<bool>(hasAlarm),'alarmSound': serializer.toJson<String>(alarmSound),'updatedAt': serializer.toJson<DateTime>(updatedAt),};}Todo copyWith({int? id,String? title,Value<DateTime?> dueDate = const Value.absent(),bool? isCompleted,int? colorTag,bool? hasAlarm,String? alarmSound,DateTime? updatedAt}) => Todo(id: id ?? this.id,title: title ?? this.title,dueDate: dueDate.present ? dueDate.value : this.dueDate,isCompleted: isCompleted ?? this.isCompleted,colorTag: colorTag ?? this.colorTag,hasAlarm: hasAlarm ?? this.hasAlarm,alarmSound: alarmSound ?? this.alarmSound,updatedAt: updatedAt ?? this.updatedAt,);Todo copyWithCompanion(TodosCompanion data) {
 return Todo(
-id: data.id.present ? data.id.value : this.id,title: data.title.present ? data.title.value : this.title,dueDate: data.dueDate.present ? data.dueDate.value : this.dueDate,isCompleted: data.isCompleted.present ? data.isCompleted.value : this.isCompleted,colorTag: data.colorTag.present ? data.colorTag.value : this.colorTag,updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,);
+id: data.id.present ? data.id.value : this.id,title: data.title.present ? data.title.value : this.title,dueDate: data.dueDate.present ? data.dueDate.value : this.dueDate,isCompleted: data.isCompleted.present ? data.isCompleted.value : this.isCompleted,colorTag: data.colorTag.present ? data.colorTag.value : this.colorTag,hasAlarm: data.hasAlarm.present ? data.hasAlarm.value : this.hasAlarm,alarmSound: data.alarmSound.present ? data.alarmSound.value : this.alarmSound,updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,);
 }
 @override
-String toString() {return (StringBuffer('Todo(')..write('id: $id, ')..write('title: $title, ')..write('dueDate: $dueDate, ')..write('isCompleted: $isCompleted, ')..write('colorTag: $colorTag, ')..write('updatedAt: $updatedAt')..write(')')).toString();}
+String toString() {return (StringBuffer('Todo(')..write('id: $id, ')..write('title: $title, ')..write('dueDate: $dueDate, ')..write('isCompleted: $isCompleted, ')..write('colorTag: $colorTag, ')..write('hasAlarm: $hasAlarm, ')..write('alarmSound: $alarmSound, ')..write('updatedAt: $updatedAt')..write(')')).toString();}
 @override
- int get hashCode => Object.hash(id, title, dueDate, isCompleted, colorTag, updatedAt);@override
-bool operator ==(Object other) => identical(this, other) || (other is Todo && other.id == this.id && other.title == this.title && other.dueDate == this.dueDate && other.isCompleted == this.isCompleted && other.colorTag == this.colorTag && other.updatedAt == this.updatedAt);
+ int get hashCode => Object.hash(id, title, dueDate, isCompleted, colorTag, hasAlarm, alarmSound, updatedAt);@override
+bool operator ==(Object other) => identical(this, other) || (other is Todo && other.id == this.id && other.title == this.title && other.dueDate == this.dueDate && other.isCompleted == this.isCompleted && other.colorTag == this.colorTag && other.hasAlarm == this.hasAlarm && other.alarmSound == this.alarmSound && other.updatedAt == this.updatedAt);
 }class TodosCompanion extends UpdateCompanion<Todo> {
 final Value<int> id;
 final Value<String> title;
 final Value<DateTime?> dueDate;
 final Value<bool> isCompleted;
 final Value<int> colorTag;
+final Value<bool> hasAlarm;
+final Value<String> alarmSound;
 final Value<DateTime> updatedAt;
-const TodosCompanion({this.id = const Value.absent(),this.title = const Value.absent(),this.dueDate = const Value.absent(),this.isCompleted = const Value.absent(),this.colorTag = const Value.absent(),this.updatedAt = const Value.absent(),});
-TodosCompanion.insert({this.id = const Value.absent(),required String title,this.dueDate = const Value.absent(),this.isCompleted = const Value.absent(),this.colorTag = const Value.absent(),required DateTime updatedAt,}): title = Value(title), updatedAt = Value(updatedAt);
+const TodosCompanion({this.id = const Value.absent(),this.title = const Value.absent(),this.dueDate = const Value.absent(),this.isCompleted = const Value.absent(),this.colorTag = const Value.absent(),this.hasAlarm = const Value.absent(),this.alarmSound = const Value.absent(),this.updatedAt = const Value.absent(),});
+TodosCompanion.insert({this.id = const Value.absent(),required String title,this.dueDate = const Value.absent(),this.isCompleted = const Value.absent(),this.colorTag = const Value.absent(),this.hasAlarm = const Value.absent(),this.alarmSound = const Value.absent(),required DateTime updatedAt,}): title = Value(title), updatedAt = Value(updatedAt);
 static Insertable<Todo> custom({Expression<int>? id, 
 Expression<String>? title, 
 Expression<DateTime>? dueDate, 
 Expression<bool>? isCompleted, 
 Expression<int>? colorTag, 
+Expression<bool>? hasAlarm, 
+Expression<String>? alarmSound, 
 Expression<DateTime>? updatedAt, 
 }) {
-return RawValuesInsertable({if (id != null)'id': id,if (title != null)'title': title,if (dueDate != null)'due_date': dueDate,if (isCompleted != null)'is_completed': isCompleted,if (colorTag != null)'color_tag': colorTag,if (updatedAt != null)'updated_at': updatedAt,});
-}TodosCompanion copyWith({Value<int>? id, Value<String>? title, Value<DateTime?>? dueDate, Value<bool>? isCompleted, Value<int>? colorTag, Value<DateTime>? updatedAt}) {
-return TodosCompanion(id: id ?? this.id,title: title ?? this.title,dueDate: dueDate ?? this.dueDate,isCompleted: isCompleted ?? this.isCompleted,colorTag: colorTag ?? this.colorTag,updatedAt: updatedAt ?? this.updatedAt,);
+return RawValuesInsertable({if (id != null)'id': id,if (title != null)'title': title,if (dueDate != null)'due_date': dueDate,if (isCompleted != null)'is_completed': isCompleted,if (colorTag != null)'color_tag': colorTag,if (hasAlarm != null)'has_alarm': hasAlarm,if (alarmSound != null)'alarm_sound': alarmSound,if (updatedAt != null)'updated_at': updatedAt,});
+}TodosCompanion copyWith({Value<int>? id, Value<String>? title, Value<DateTime?>? dueDate, Value<bool>? isCompleted, Value<int>? colorTag, Value<bool>? hasAlarm, Value<String>? alarmSound, Value<DateTime>? updatedAt}) {
+return TodosCompanion(id: id ?? this.id,title: title ?? this.title,dueDate: dueDate ?? this.dueDate,isCompleted: isCompleted ?? this.isCompleted,colorTag: colorTag ?? this.colorTag,hasAlarm: hasAlarm ?? this.hasAlarm,alarmSound: alarmSound ?? this.alarmSound,updatedAt: updatedAt ?? this.updatedAt,);
 }
 @override
 Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -257,12 +273,16 @@ if (isCompleted.present) {
 map['is_completed'] = Variable<bool>(isCompleted.value);}
 if (colorTag.present) {
 map['color_tag'] = Variable<int>(colorTag.value);}
+if (hasAlarm.present) {
+map['has_alarm'] = Variable<bool>(hasAlarm.value);}
+if (alarmSound.present) {
+map['alarm_sound'] = Variable<String>(alarmSound.value);}
 if (updatedAt.present) {
 map['updated_at'] = Variable<DateTime>(updatedAt.value);}
 return map; 
 }
 @override
-String toString() {return (StringBuffer('TodosCompanion(')..write('id: $id, ')..write('title: $title, ')..write('dueDate: $dueDate, ')..write('isCompleted: $isCompleted, ')..write('colorTag: $colorTag, ')..write('updatedAt: $updatedAt')..write(')')).toString();}
+String toString() {return (StringBuffer('TodosCompanion(')..write('id: $id, ')..write('title: $title, ')..write('dueDate: $dueDate, ')..write('isCompleted: $isCompleted, ')..write('colorTag: $colorTag, ')..write('hasAlarm: $hasAlarm, ')..write('alarmSound: $alarmSound, ')..write('updatedAt: $updatedAt')..write(')')).toString();}
 }
 class $PomodoroSessionsTable extends PomodoroSessions with TableInfo<$PomodoroSessionsTable, PomodoroSession>{
 @override final GeneratedDatabase attachedDatabase;
@@ -651,8 +671,8 @@ GeneratedColumn<DateTime> get updatedAt => $composableBuilder(
     (Note,BaseReferences<_$AppDatabase,$NotesTable,Note>),
     Note,
     PrefetchHooks Function()
-    >;typedef $$TodosTableCreateCompanionBuilder = TodosCompanion Function({Value<int> id,required String title,Value<DateTime?> dueDate,Value<bool> isCompleted,Value<int> colorTag,required DateTime updatedAt,});
-typedef $$TodosTableUpdateCompanionBuilder = TodosCompanion Function({Value<int> id,Value<String> title,Value<DateTime?> dueDate,Value<bool> isCompleted,Value<int> colorTag,Value<DateTime> updatedAt,});
+    >;typedef $$TodosTableCreateCompanionBuilder = TodosCompanion Function({Value<int> id,required String title,Value<DateTime?> dueDate,Value<bool> isCompleted,Value<int> colorTag,Value<bool> hasAlarm,Value<String> alarmSound,required DateTime updatedAt,});
+typedef $$TodosTableUpdateCompanionBuilder = TodosCompanion Function({Value<int> id,Value<String> title,Value<DateTime?> dueDate,Value<bool> isCompleted,Value<int> colorTag,Value<bool> hasAlarm,Value<String> alarmSound,Value<DateTime> updatedAt,});
 class $$TodosTableFilterComposer extends Composer<
         _$AppDatabase,
         $TodosTable> {
@@ -685,6 +705,16 @@ ColumnFilters<bool> get isCompleted => $composableBuilder(
       
 ColumnFilters<int> get colorTag => $composableBuilder(
       column: $table.colorTag,
+      builder: (column) => 
+      ColumnFilters(column));
+      
+ColumnFilters<bool> get hasAlarm => $composableBuilder(
+      column: $table.hasAlarm,
+      builder: (column) => 
+      ColumnFilters(column));
+      
+ColumnFilters<String> get alarmSound => $composableBuilder(
+      column: $table.alarmSound,
       builder: (column) => 
       ColumnFilters(column));
       
@@ -729,6 +759,16 @@ ColumnOrderings<int> get colorTag => $composableBuilder(
       builder: (column) => 
       ColumnOrderings(column));
       
+ColumnOrderings<bool> get hasAlarm => $composableBuilder(
+      column: $table.hasAlarm,
+      builder: (column) => 
+      ColumnOrderings(column));
+      
+ColumnOrderings<String> get alarmSound => $composableBuilder(
+      column: $table.alarmSound,
+      builder: (column) => 
+      ColumnOrderings(column));
+      
 ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
       column: $table.updatedAt,
       builder: (column) => 
@@ -765,6 +805,14 @@ GeneratedColumn<int> get colorTag => $composableBuilder(
       column: $table.colorTag,
       builder: (column) => column);
       
+GeneratedColumn<bool> get hasAlarm => $composableBuilder(
+      column: $table.hasAlarm,
+      builder: (column) => column);
+      
+GeneratedColumn<String> get alarmSound => $composableBuilder(
+      column: $table.alarmSound,
+      builder: (column) => column);
+      
 GeneratedColumn<DateTime> get updatedAt => $composableBuilder(
       column: $table.updatedAt,
       builder: (column) => column);
@@ -789,8 +837,8 @@ GeneratedColumn<DateTime> get updatedAt => $composableBuilder(
         createFilteringComposer: () => $$TodosTableFilterComposer($db: db,$table:table),
         createOrderingComposer: () => $$TodosTableOrderingComposer($db: db,$table:table),
         createComputedFieldComposer: () => $$TodosTableAnnotationComposer($db: db,$table:table),
-        updateCompanionCallback: ({Value<int> id = const Value.absent(),Value<String> title = const Value.absent(),Value<DateTime?> dueDate = const Value.absent(),Value<bool> isCompleted = const Value.absent(),Value<int> colorTag = const Value.absent(),Value<DateTime> updatedAt = const Value.absent(),})=> TodosCompanion(id: id,title: title,dueDate: dueDate,isCompleted: isCompleted,colorTag: colorTag,updatedAt: updatedAt,),
-        createCompanionCallback: ({Value<int> id = const Value.absent(),required String title,Value<DateTime?> dueDate = const Value.absent(),Value<bool> isCompleted = const Value.absent(),Value<int> colorTag = const Value.absent(),required DateTime updatedAt,})=> TodosCompanion.insert(id: id,title: title,dueDate: dueDate,isCompleted: isCompleted,colorTag: colorTag,updatedAt: updatedAt,),
+        updateCompanionCallback: ({Value<int> id = const Value.absent(),Value<String> title = const Value.absent(),Value<DateTime?> dueDate = const Value.absent(),Value<bool> isCompleted = const Value.absent(),Value<int> colorTag = const Value.absent(),Value<bool> hasAlarm = const Value.absent(),Value<String> alarmSound = const Value.absent(),Value<DateTime> updatedAt = const Value.absent(),})=> TodosCompanion(id: id,title: title,dueDate: dueDate,isCompleted: isCompleted,colorTag: colorTag,hasAlarm: hasAlarm,alarmSound: alarmSound,updatedAt: updatedAt,),
+        createCompanionCallback: ({Value<int> id = const Value.absent(),required String title,Value<DateTime?> dueDate = const Value.absent(),Value<bool> isCompleted = const Value.absent(),Value<int> colorTag = const Value.absent(),Value<bool> hasAlarm = const Value.absent(),Value<String> alarmSound = const Value.absent(),required DateTime updatedAt,})=> TodosCompanion.insert(id: id,title: title,dueDate: dueDate,isCompleted: isCompleted,colorTag: colorTag,hasAlarm: hasAlarm,alarmSound: alarmSound,updatedAt: updatedAt,),
         withReferenceMapper: (p0) => p0
               .map(
                   (e) =>

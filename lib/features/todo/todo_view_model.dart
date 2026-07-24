@@ -18,6 +18,8 @@ class TodoViewModel extends _$TodoViewModel {
     required DateTime? dueDate,
     required int colorTag,
     required bool hasReminder,
+    required bool hasAlarm,
+    required String alarmSound,
   }) async {
     final now = DateTime.now();
     final companion = TodosCompanion.insert(
@@ -25,13 +27,15 @@ class TodoViewModel extends _$TodoViewModel {
       dueDate: Value(dueDate),
       colorTag: Value(colorTag),
       isCompleted: const Value(false),
+      hasAlarm: Value(hasAlarm),
+      alarmSound: Value(alarmSound),
       updatedAt: now,
     );
 
     final id = await ref.read(todoRepositoryProvider).add(companion);
 
     if (hasReminder && dueDate != null) {
-      await _scheduleTodoNotification(id, title, dueDate);
+      await _scheduleTodoNotification(id, title, dueDate, hasAlarm, alarmSound);
     }
 
     return id;
@@ -44,12 +48,16 @@ class TodoViewModel extends _$TodoViewModel {
     required int colorTag,
     required bool isCompleted,
     required bool hasReminder,
+    required bool hasAlarm,
+    required String alarmSound,
   }) async {
     final companion = TodosCompanion(
       title: Value(title),
       dueDate: Value(dueDate),
       colorTag: Value(colorTag),
       isCompleted: Value(isCompleted),
+      hasAlarm: Value(hasAlarm),
+      alarmSound: Value(alarmSound),
       updatedAt: Value(DateTime.now()),
     );
 
@@ -60,7 +68,7 @@ class TodoViewModel extends _$TodoViewModel {
 
     // Schedule new one if not completed, reminder is requested, and due date is in the future
     if (!isCompleted && hasReminder && dueDate != null && dueDate.isAfter(DateTime.now())) {
-      await _scheduleTodoNotification(id, title, dueDate);
+      await _scheduleTodoNotification(id, title, dueDate, hasAlarm, alarmSound);
     }
   }
 
@@ -79,7 +87,7 @@ class TodoViewModel extends _$TodoViewModel {
       // If uncompleted and original note had reminder setup (meaning dueDate is not null), we should schedule if due date is still valid.
       // For simplicity, we check if it has a due date in the future and schedule it.
       if (todo.dueDate != null && todo.dueDate!.isAfter(DateTime.now())) {
-        await _scheduleTodoNotification(todo.id, todo.title, todo.dueDate!);
+        await _scheduleTodoNotification(todo.id, todo.title, todo.dueDate!, todo.hasAlarm, todo.alarmSound);
       }
     }
   }
@@ -95,19 +103,21 @@ class TodoViewModel extends _$TodoViewModel {
       dueDate: Value(todo.dueDate),
       colorTag: Value(todo.colorTag),
       isCompleted: Value(todo.isCompleted),
+      hasAlarm: Value(todo.hasAlarm),
+      alarmSound: Value(todo.alarmSound),
       updatedAt: todo.updatedAt,
     );
 
     final id = await ref.read(todoRepositoryProvider).add(companion);
 
     if (!todo.isCompleted && todo.dueDate != null && todo.dueDate!.isAfter(DateTime.now())) {
-      await _scheduleTodoNotification(id, todo.title, todo.dueDate!);
+      await _scheduleTodoNotification(id, todo.title, todo.dueDate!, todo.hasAlarm, todo.alarmSound);
     }
 
     return id;
   }
 
-  Future<void> _scheduleTodoNotification(int id, String title, DateTime scheduledTime) async {
+  Future<void> _scheduleTodoNotification(int id, String title, DateTime scheduledTime, bool hasAlarm, String alarmSound) async {
     // Request permission just in case
     await ref.read(notificationServiceProvider).requestPermissions();
     await ref.read(notificationServiceProvider).scheduleNotification(
@@ -115,6 +125,7 @@ class TodoViewModel extends _$TodoViewModel {
       title: 'Task Reminder',
       body: title.isNotEmpty ? title : 'Untitled Task is due now!',
       scheduledTime: scheduledTime,
+      playSound: hasAlarm && alarmSound != 'silent',
     );
   }
 }

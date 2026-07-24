@@ -6,7 +6,7 @@ import 'package:tick_notes/core/notifications/notification_service.dart';
 import 'package:tick_notes/features/notes/note_editor_screen.dart';
 import 'package:tick_notes/features/todo/todo_editor_screen.dart';
 import 'Constants/routes.dart';
-import 'package:tick_notes/core/splash/animated_splash_screen.dart';
+import 'package:tick_notes/core/splash/home_page.dart';
 
 void main() {
   final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
@@ -51,7 +51,7 @@ class MyApp extends ConsumerWidget {
         ),
       ),
       themeMode: themeSettings.themeMode,
-      home: const AnimatedSplashScreen(),
+      home: const HomePage(),
       routes: {
         createOrUpdateNoteRoute: (context) => const NoteEditorScreen(),
         createOrUpdateTodoRoute: (context) => const TodoEditorScreen(),
