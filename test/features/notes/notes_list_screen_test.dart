@@ -71,6 +71,7 @@ void main() {
         title: 'Groceries',
         body: 'Milk',
         colorTag: 0,
+        isList: false,
         updatedAt: DateTime.now(),
       );
       final mockNotesViewModel = MockNotesViewModel(Stream.value([note]));

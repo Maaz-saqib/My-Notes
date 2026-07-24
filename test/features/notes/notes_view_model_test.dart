@@ -43,6 +43,7 @@ void main() {
           title: 'Test Note',
           body: 'Test Body',
           colorTag: 0,
+          isList: false,
           updatedAt: DateTime.now(),
         ),
       ];
@@ -106,6 +107,7 @@ void main() {
         title: 'Found',
         body: 'Body',
         colorTag: 1,
+        isList: false,
         updatedAt: DateTime.now(),
       );
       when(() => mockRepo.watchAll())

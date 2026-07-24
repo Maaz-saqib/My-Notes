@@ -12,24 +12,26 @@ class NotesViewModel extends _$NotesViewModel {
     return ref.watch(notesRepositoryProvider).watchAll();
   }
 
-  Future<int> addNote(String title, String body, int colorTag) {
+  Future<int> addNote(String title, String body, int colorTag, {bool isList = false}) {
     return ref.read(notesRepositoryProvider).add(
       NotesCompanion.insert(
         title: title,
         body: body,
         colorTag: Value(colorTag),
+        isList: Value(isList),
         updatedAt: DateTime.now(),
       ),
     );
   }
 
-  Future<void> updateNoteContent(int id, String title, String body, int colorTag) {
+  Future<void> updateNoteContent(int id, String title, String body, int colorTag, {bool isList = false}) {
     return ref.read(notesRepositoryProvider).updateNote(
       id,
       NotesCompanion(
         title: Value(title),
         body: Value(body),
         colorTag: Value(colorTag),
+        isList: Value(isList),
         updatedAt: Value(DateTime.now()),
       ),
     );
@@ -45,6 +47,7 @@ class NotesViewModel extends _$NotesViewModel {
         title: note.title,
         body: note.body,
         colorTag: Value(note.colorTag),
+        isList: Value(note.isList),
         updatedAt: note.updatedAt,
       ),
     );

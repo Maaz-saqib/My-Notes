@@ -9,27 +9,7 @@ class PomodoroScreen extends ConsumerStatefulWidget {
   ConsumerState<PomodoroScreen> createState() => _PomodoroScreenState();
 }
 
-class _PomodoroScreenState extends ConsumerState<PomodoroScreen>
-    with WidgetsBindingObserver {
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    super.didChangeAppLifecycleState(state);
-    final isResumed = state == AppLifecycleState.resumed;
-    ref.read(pomodoroViewModelProvider.notifier).handleLifecycleChange(isResumed);
-  }
+class _PomodoroScreenState extends ConsumerState<PomodoroScreen> {
 
   String _formatDuration(Duration duration) {
     final mins = duration.inMinutes.toString().padLeft(2, '0');

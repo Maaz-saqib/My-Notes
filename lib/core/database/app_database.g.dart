@@ -19,11 +19,14 @@ late final GeneratedColumn<String> body = GeneratedColumn<String>('body', aliase
 static const VerificationMeta _colorTagMeta = const VerificationMeta('colorTag');
 @override
 late final GeneratedColumn<int> colorTag = GeneratedColumn<int>('color_tag', aliasedName, false, type: DriftSqlType.int, requiredDuringInsert: false, defaultValue: const Constant(0));
+static const VerificationMeta _isListMeta = const VerificationMeta('isList');
+@override
+late final GeneratedColumn<bool> isList = GeneratedColumn<bool>('is_list', aliasedName, false, type: DriftSqlType.bool, requiredDuringInsert: false, defaultConstraints: GeneratedColumn.constraintIsAlways('CHECK ("is_list" IN (0, 1))'), defaultValue: const Constant(false));
 static const VerificationMeta _updatedAtMeta = const VerificationMeta('updatedAt');
 @override
 late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>('updated_at', aliasedName, false, type: DriftSqlType.dateTime, requiredDuringInsert: true);
 @override
-List<GeneratedColumn> get $columns => [id, title, body, colorTag, updatedAt];
+List<GeneratedColumn> get $columns => [id, title, body, colorTag, isList, updatedAt];
 @override
 String get aliasedName => _alias ?? actualTableName;
 @override
@@ -43,7 +46,8 @@ context.handle(_bodyMeta, body.isAcceptableOrUnknown(data['body']!, _bodyMeta));
 context.missing(_bodyMeta);
 }
 if (data.containsKey('color_tag')) {
-context.handle(_colorTagMeta, colorTag.isAcceptableOrUnknown(data['color_tag']!, _colorTagMeta));}if (data.containsKey('updated_at')) {
+context.handle(_colorTagMeta, colorTag.isAcceptableOrUnknown(data['color_tag']!, _colorTagMeta));}if (data.containsKey('is_list')) {
+context.handle(_isListMeta, isList.isAcceptableOrUnknown(data['is_list']!, _isListMeta));}if (data.containsKey('updated_at')) {
 context.handle(_updatedAtMeta, updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));} else if (isInserting) {
 context.missing(_updatedAtMeta);
 }
@@ -52,7 +56,7 @@ return context;
 @override
 Set<GeneratedColumn> get $primaryKey => {id};
 @override Note map(Map<String, dynamic> data, {String? tablePrefix})  {
-final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';return Note(id: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}id'])!, title: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}title'])!, body: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}body'])!, colorTag: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}color_tag'])!, updatedAt: attachedDatabase.typeMapping.read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!, );
+final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';return Note(id: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}id'])!, title: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}title'])!, body: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}body'])!, colorTag: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}color_tag'])!, isList: attachedDatabase.typeMapping.read(DriftSqlType.bool, data['${effectivePrefix}is_list'])!, updatedAt: attachedDatabase.typeMapping.read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!, );
 }
 @override
 $NotesTable createAlias(String alias) {
@@ -62,51 +66,55 @@ final int id;
 final String title;
 final String body;
 final int colorTag;
+final bool isList;
 final DateTime updatedAt;
-const Note({required this.id, required this.title, required this.body, required this.colorTag, required this.updatedAt});@override
+const Note({required this.id, required this.title, required this.body, required this.colorTag, required this.isList, required this.updatedAt});@override
 Map<String, Expression> toColumns(bool nullToAbsent) {
 final map = <String, Expression> {};map['id'] = Variable<int>(id);
 map['title'] = Variable<String>(title);
 map['body'] = Variable<String>(body);
 map['color_tag'] = Variable<int>(colorTag);
+map['is_list'] = Variable<bool>(isList);
 map['updated_at'] = Variable<DateTime>(updatedAt);
 return map; 
 }
 NotesCompanion toCompanion(bool nullToAbsent) {
-return NotesCompanion(id: Value(id),title: Value(title),body: Value(body),colorTag: Value(colorTag),updatedAt: Value(updatedAt),);
+return NotesCompanion(id: Value(id),title: Value(title),body: Value(body),colorTag: Value(colorTag),isList: Value(isList),updatedAt: Value(updatedAt),);
 }
 factory Note.fromJson(Map<String, dynamic> json, {ValueSerializer? serializer}) {
 serializer ??= driftRuntimeOptions.defaultSerializer;
-return Note(id: serializer.fromJson<int>(json['id']),title: serializer.fromJson<String>(json['title']),body: serializer.fromJson<String>(json['body']),colorTag: serializer.fromJson<int>(json['colorTag']),updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),);}
+return Note(id: serializer.fromJson<int>(json['id']),title: serializer.fromJson<String>(json['title']),body: serializer.fromJson<String>(json['body']),colorTag: serializer.fromJson<int>(json['colorTag']),isList: serializer.fromJson<bool>(json['isList']),updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),);}
 @override Map<String, dynamic> toJson({ValueSerializer? serializer}) {
 serializer ??= driftRuntimeOptions.defaultSerializer;
 return <String, dynamic>{
-'id': serializer.toJson<int>(id),'title': serializer.toJson<String>(title),'body': serializer.toJson<String>(body),'colorTag': serializer.toJson<int>(colorTag),'updatedAt': serializer.toJson<DateTime>(updatedAt),};}Note copyWith({int? id,String? title,String? body,int? colorTag,DateTime? updatedAt}) => Note(id: id ?? this.id,title: title ?? this.title,body: body ?? this.body,colorTag: colorTag ?? this.colorTag,updatedAt: updatedAt ?? this.updatedAt,);Note copyWithCompanion(NotesCompanion data) {
+'id': serializer.toJson<int>(id),'title': serializer.toJson<String>(title),'body': serializer.toJson<String>(body),'colorTag': serializer.toJson<int>(colorTag),'isList': serializer.toJson<bool>(isList),'updatedAt': serializer.toJson<DateTime>(updatedAt),};}Note copyWith({int? id,String? title,String? body,int? colorTag,bool? isList,DateTime? updatedAt}) => Note(id: id ?? this.id,title: title ?? this.title,body: body ?? this.body,colorTag: colorTag ?? this.colorTag,isList: isList ?? this.isList,updatedAt: updatedAt ?? this.updatedAt,);Note copyWithCompanion(NotesCompanion data) {
 return Note(
-id: data.id.present ? data.id.value : this.id,title: data.title.present ? data.title.value : this.title,body: data.body.present ? data.body.value : this.body,colorTag: data.colorTag.present ? data.colorTag.value : this.colorTag,updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,);
+id: data.id.present ? data.id.value : this.id,title: data.title.present ? data.title.value : this.title,body: data.body.present ? data.body.value : this.body,colorTag: data.colorTag.present ? data.colorTag.value : this.colorTag,isList: data.isList.present ? data.isList.value : this.isList,updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,);
 }
 @override
-String toString() {return (StringBuffer('Note(')..write('id: $id, ')..write('title: $title, ')..write('body: $body, ')..write('colorTag: $colorTag, ')..write('updatedAt: $updatedAt')..write(')')).toString();}
+String toString() {return (StringBuffer('Note(')..write('id: $id, ')..write('title: $title, ')..write('body: $body, ')..write('colorTag: $colorTag, ')..write('isList: $isList, ')..write('updatedAt: $updatedAt')..write(')')).toString();}
 @override
- int get hashCode => Object.hash(id, title, body, colorTag, updatedAt);@override
-bool operator ==(Object other) => identical(this, other) || (other is Note && other.id == this.id && other.title == this.title && other.body == this.body && other.colorTag == this.colorTag && other.updatedAt == this.updatedAt);
+ int get hashCode => Object.hash(id, title, body, colorTag, isList, updatedAt);@override
+bool operator ==(Object other) => identical(this, other) || (other is Note && other.id == this.id && other.title == this.title && other.body == this.body && other.colorTag == this.colorTag && other.isList == this.isList && other.updatedAt == this.updatedAt);
 }class NotesCompanion extends UpdateCompanion<Note> {
 final Value<int> id;
 final Value<String> title;
 final Value<String> body;
 final Value<int> colorTag;
+final Value<bool> isList;
 final Value<DateTime> updatedAt;
-const NotesCompanion({this.id = const Value.absent(),this.title = const Value.absent(),this.body = const Value.absent(),this.colorTag = const Value.absent(),this.updatedAt = const Value.absent(),});
-NotesCompanion.insert({this.id = const Value.absent(),required String title,required String body,this.colorTag = const Value.absent(),required DateTime updatedAt,}): title = Value(title), body = Value(body), updatedAt = Value(updatedAt);
+const NotesCompanion({this.id = const Value.absent(),this.title = const Value.absent(),this.body = const Value.absent(),this.colorTag = const Value.absent(),this.isList = const Value.absent(),this.updatedAt = const Value.absent(),});
+NotesCompanion.insert({this.id = const Value.absent(),required String title,required String body,this.colorTag = const Value.absent(),this.isList = const Value.absent(),required DateTime updatedAt,}): title = Value(title), body = Value(body), updatedAt = Value(updatedAt);
 static Insertable<Note> custom({Expression<int>? id, 
 Expression<String>? title, 
 Expression<String>? body, 
 Expression<int>? colorTag, 
+Expression<bool>? isList, 
 Expression<DateTime>? updatedAt, 
 }) {
-return RawValuesInsertable({if (id != null)'id': id,if (title != null)'title': title,if (body != null)'body': body,if (colorTag != null)'color_tag': colorTag,if (updatedAt != null)'updated_at': updatedAt,});
-}NotesCompanion copyWith({Value<int>? id, Value<String>? title, Value<String>? body, Value<int>? colorTag, Value<DateTime>? updatedAt}) {
-return NotesCompanion(id: id ?? this.id,title: title ?? this.title,body: body ?? this.body,colorTag: colorTag ?? this.colorTag,updatedAt: updatedAt ?? this.updatedAt,);
+return RawValuesInsertable({if (id != null)'id': id,if (title != null)'title': title,if (body != null)'body': body,if (colorTag != null)'color_tag': colorTag,if (isList != null)'is_list': isList,if (updatedAt != null)'updated_at': updatedAt,});
+}NotesCompanion copyWith({Value<int>? id, Value<String>? title, Value<String>? body, Value<int>? colorTag, Value<bool>? isList, Value<DateTime>? updatedAt}) {
+return NotesCompanion(id: id ?? this.id,title: title ?? this.title,body: body ?? this.body,colorTag: colorTag ?? this.colorTag,isList: isList ?? this.isList,updatedAt: updatedAt ?? this.updatedAt,);
 }
 @override
 Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -118,12 +126,14 @@ if (body.present) {
 map['body'] = Variable<String>(body.value);}
 if (colorTag.present) {
 map['color_tag'] = Variable<int>(colorTag.value);}
+if (isList.present) {
+map['is_list'] = Variable<bool>(isList.value);}
 if (updatedAt.present) {
 map['updated_at'] = Variable<DateTime>(updatedAt.value);}
 return map; 
 }
 @override
-String toString() {return (StringBuffer('NotesCompanion(')..write('id: $id, ')..write('title: $title, ')..write('body: $body, ')..write('colorTag: $colorTag, ')..write('updatedAt: $updatedAt')..write(')')).toString();}
+String toString() {return (StringBuffer('NotesCompanion(')..write('id: $id, ')..write('title: $title, ')..write('body: $body, ')..write('colorTag: $colorTag, ')..write('isList: $isList, ')..write('updatedAt: $updatedAt')..write(')')).toString();}
 }
 class $TodosTable extends Todos with TableInfo<$TodosTable, Todo>{
 @override final GeneratedDatabase attachedDatabase;
@@ -481,8 +491,8 @@ Iterable<TableInfo<Table, Object?>> get allTables => allSchemaEntities.whereType
 @override
 List<DatabaseSchemaEntity> get allSchemaEntities => [notes, todos, pomodoroSessions, settings];
 }
-typedef $$NotesTableCreateCompanionBuilder = NotesCompanion Function({Value<int> id,required String title,required String body,Value<int> colorTag,required DateTime updatedAt,});
-typedef $$NotesTableUpdateCompanionBuilder = NotesCompanion Function({Value<int> id,Value<String> title,Value<String> body,Value<int> colorTag,Value<DateTime> updatedAt,});
+typedef $$NotesTableCreateCompanionBuilder = NotesCompanion Function({Value<int> id,required String title,required String body,Value<int> colorTag,Value<bool> isList,required DateTime updatedAt,});
+typedef $$NotesTableUpdateCompanionBuilder = NotesCompanion Function({Value<int> id,Value<String> title,Value<String> body,Value<int> colorTag,Value<bool> isList,Value<DateTime> updatedAt,});
 class $$NotesTableFilterComposer extends Composer<
         _$AppDatabase,
         $NotesTable> {
@@ -510,6 +520,11 @@ ColumnFilters<String> get body => $composableBuilder(
       
 ColumnFilters<int> get colorTag => $composableBuilder(
       column: $table.colorTag,
+      builder: (column) => 
+      ColumnFilters(column));
+      
+ColumnFilters<bool> get isList => $composableBuilder(
+      column: $table.isList,
       builder: (column) => 
       ColumnFilters(column));
       
@@ -549,6 +564,11 @@ ColumnOrderings<int> get colorTag => $composableBuilder(
       builder: (column) => 
       ColumnOrderings(column));
       
+ColumnOrderings<bool> get isList => $composableBuilder(
+      column: $table.isList,
+      builder: (column) => 
+      ColumnOrderings(column));
+      
 ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
       column: $table.updatedAt,
       builder: (column) => 
@@ -581,6 +601,10 @@ GeneratedColumn<int> get colorTag => $composableBuilder(
       column: $table.colorTag,
       builder: (column) => column);
       
+GeneratedColumn<bool> get isList => $composableBuilder(
+      column: $table.isList,
+      builder: (column) => column);
+      
 GeneratedColumn<DateTime> get updatedAt => $composableBuilder(
       column: $table.updatedAt,
       builder: (column) => column);
@@ -605,8 +629,8 @@ GeneratedColumn<DateTime> get updatedAt => $composableBuilder(
         createFilteringComposer: () => $$NotesTableFilterComposer($db: db,$table:table),
         createOrderingComposer: () => $$NotesTableOrderingComposer($db: db,$table:table),
         createComputedFieldComposer: () => $$NotesTableAnnotationComposer($db: db,$table:table),
-        updateCompanionCallback: ({Value<int> id = const Value.absent(),Value<String> title = const Value.absent(),Value<String> body = const Value.absent(),Value<int> colorTag = const Value.absent(),Value<DateTime> updatedAt = const Value.absent(),})=> NotesCompanion(id: id,title: title,body: body,colorTag: colorTag,updatedAt: updatedAt,),
-        createCompanionCallback: ({Value<int> id = const Value.absent(),required String title,required String body,Value<int> colorTag = const Value.absent(),required DateTime updatedAt,})=> NotesCompanion.insert(id: id,title: title,body: body,colorTag: colorTag,updatedAt: updatedAt,),
+        updateCompanionCallback: ({Value<int> id = const Value.absent(),Value<String> title = const Value.absent(),Value<String> body = const Value.absent(),Value<int> colorTag = const Value.absent(),Value<bool> isList = const Value.absent(),Value<DateTime> updatedAt = const Value.absent(),})=> NotesCompanion(id: id,title: title,body: body,colorTag: colorTag,isList: isList,updatedAt: updatedAt,),
+        createCompanionCallback: ({Value<int> id = const Value.absent(),required String title,required String body,Value<int> colorTag = const Value.absent(),Value<bool> isList = const Value.absent(),required DateTime updatedAt,})=> NotesCompanion.insert(id: id,title: title,body: body,colorTag: colorTag,isList: isList,updatedAt: updatedAt,),
         withReferenceMapper: (p0) => p0
               .map(
                   (e) =>

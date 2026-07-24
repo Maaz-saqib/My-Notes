@@ -4,6 +4,8 @@ import 'package:tick_notes/core/theme/theme_notifier.dart';
 import 'notes_view_model.dart';
 import '../../Utilities/theme_utils.dart';
 import '../../Constants/routes.dart';
+import '../../core/database/app_database.dart';
+import 'checklist_item.dart';
 
 class NotesListScreen extends ConsumerStatefulWidget {
   final GlobalKey? addNoteKey;
@@ -39,6 +41,15 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
     } else {
       return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
     }
+  }
+
+  String _getNotePreview(Note note) {
+    if (note.isList) {
+      final items = ChecklistItem.fromJsonList(note.body);
+      if (items.isEmpty) return 'No items';
+      return items.map((e) => '${e.isChecked ? '[x]' : '[ ]'} ${e.text}').join('\n');
+    }
+    return note.body.isNotEmpty ? note.body : 'No content';
   }
 
   @override
@@ -86,7 +97,40 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
           IconButton(
             key: widget.addNoteKey,
             onPressed: () {
-              Navigator.of(context).pushNamed(createOrUpdateNoteRoute);
+              showModalBottomSheet(
+                context: context,
+                builder: (context) {
+                  return SafeArea(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ListTile(
+                          leading: const Icon(Icons.text_fields),
+                          title: const Text('Text Note'),
+                          onTap: () {
+                            Navigator.pop(context);
+                            Navigator.of(context).pushNamed(
+                              createOrUpdateNoteRoute,
+                              arguments: Note(id: -1, title: '', body: '', colorTag: 0, isList: false, updatedAt: DateTime.now()),
+                            );
+                          },
+                        ),
+                        ListTile(
+                          leading: const Icon(Icons.checklist),
+                          title: const Text('Checklist'),
+                          onTap: () {
+                            Navigator.pop(context);
+                            Navigator.of(context).pushNamed(
+                              createOrUpdateNoteRoute,
+                              arguments: Note(id: -1, title: '', body: '', colorTag: 0, isList: true, updatedAt: DateTime.now()),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  );
+                }
+              );
             },
             icon: const Icon(Icons.add),
           ),
@@ -306,9 +350,7 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
                                 const SizedBox(height: 8),
                                 Expanded(
                                   child: Text(
-                                    note.body.isNotEmpty
-                                        ? note.body
-                                        : 'No content',
+                                    _getNotePreview(note),
                                     style: Theme.of(context)
                                         .textTheme
                                         .bodyMedium

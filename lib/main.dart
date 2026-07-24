@@ -8,8 +8,6 @@ import 'package:tick_notes/features/todo/todo_editor_screen.dart';
 import 'Constants/routes.dart';
 import 'package:tick_notes/core/splash/animated_splash_screen.dart';
 
-
-
 void main() {
   final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
 
@@ -22,6 +20,8 @@ void main() {
     debugPrint('Failed to initialize NotificationService: $e');
     debugPrint(stack.toString());
   });
+
+  // NotificationService init is already above.
 
   runApp(const ProviderScope(child: MyApp()));
 }

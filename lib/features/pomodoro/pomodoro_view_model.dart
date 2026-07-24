@@ -7,7 +7,6 @@ import '../../core/database/app_database.dart';
 import '../../core/notifications/notification_service.dart';
 
 part 'pomodoro_view_model.g.dart';
-
 enum FocusMode { pomodoro, open }
 
 enum PomodoroPhase { focus, breakPhase }
@@ -116,10 +115,13 @@ class PomodoroViewModel extends _$PomodoroViewModel {
     _saveState();
   }
 
-  void startSession() {
+  Future<void> startSession() async {
     if (state.isRunning) return;
 
     final now = DateTime.now();
+
+    // The original timer relies on internal state and background delta time.
+    
     state = state.copyWith(
       isRunning: true,
       sessionStart: state.sessionStart ?? now,
@@ -247,35 +249,14 @@ class PomodoroViewModel extends _$PomodoroViewModel {
     _saveState();
   }
 
-  void handleLifecycleChange(bool resumed) {
+  void handleLifecycleChange(AppLifecycleState appState) {
     if (!state.isRunning) return;
 
-    if (resumed) {
-      final start = state.lastTickTime;
-      if (start != null) {
-        final now = DateTime.now();
-        final delta = now.difference(start);
-        final newElapsed = state.elapsedDuration + delta;
-
-        if (state.mode == FocusMode.pomodoro &&
-            newElapsed >= state.durationLimit) {
-          // Timer finished in background
-          state = state.copyWith(
-            elapsedDuration: state.durationLimit,
-            lastTickTime: now,
-          );
-          _sessionCompleted();
-        } else {
-          state = state.copyWith(
-            elapsedDuration: newElapsed,
-            lastTickTime: now,
-          );
-          _startTimer();
-        }
-      }
-    } else {
-      _timer?.cancel();
-      state = state.copyWith(lastTickTime: DateTime.now());
+    if (appState == AppLifecycleState.paused || 
+        appState == AppLifecycleState.inactive || 
+        appState == AppLifecycleState.hidden) {
+      // Just save the state aggressively when minimizing, but DO NOT cancel the periodic timer!
+      // The timer will gracefully continue running in the background thread (or pause and resume perfectly using delta math).
       _saveState();
     }
   }
@@ -284,7 +265,11 @@ class PomodoroViewModel extends _$PomodoroViewModel {
     _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       final now = DateTime.now();
-      final newElapsed = state.elapsedDuration + const Duration(seconds: 1);
+      
+      // Calculate true delta since last tick to handle OS suspension/minimization
+      final start = state.lastTickTime ?? now.subtract(const Duration(seconds: 1));
+      final delta = now.difference(start);
+      final newElapsed = state.elapsedDuration + delta;
 
       if (state.mode == FocusMode.pomodoro &&
           newElapsed >= state.durationLimit) {
@@ -295,12 +280,18 @@ class PomodoroViewModel extends _$PomodoroViewModel {
         _sessionCompleted();
       } else {
         state = state.copyWith(elapsedDuration: newElapsed, lastTickTime: now);
+        
+        // Save state every 5 seconds so if the OS forcefully kills the app, 
+        // we don't lose more than 5 seconds of progress when recovering the time delta!
+        if (newElapsed.inSeconds % 5 == 0) {
+          _saveState();
+        }
       }
     });
   }
 
   void _sessionCompleted() {
-    _timer?.cancel();
+    _saveState();
     final start =
         state.sessionStart ?? DateTime.now().subtract(state.durationLimit);
     final now = DateTime.now();
@@ -406,6 +397,7 @@ class PomodoroViewModel extends _$PomodoroViewModel {
     prefs.setString('pomodoro_phase', state.pomodoroPhase.name);
     prefs.setInt('pomodoro_session', state.pomodoroSession);
     prefs.setInt('pomodoro_elapsed', state.elapsedDuration.inSeconds);
+    prefs.setInt('pomodoro_duration_limit', state.durationLimit.inMinutes);
     if (state.sessionStart != null) {
       prefs.setString('pomodoro_sessionStart', state.sessionStart!.toIso8601String());
     } else {
@@ -425,8 +417,7 @@ class _LifecycleObserver extends WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    final isResumed = state == AppLifecycleState.resumed;
-    notifier.handleLifecycleChange(isResumed);
+    notifier.handleLifecycleChange(state);
   }
 }
 

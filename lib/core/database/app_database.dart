@@ -11,6 +11,7 @@ class Notes extends Table {
   TextColumn get title => text()();
   TextColumn get body => text()();
   IntColumn get colorTag => integer().withDefault(const Constant(0))();
+  BoolColumn get isList => boolean().withDefault(const Constant(false))();
   DateTimeColumn get updatedAt => dateTime()();
 }
 
@@ -44,7 +45,19 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+        onCreate: (Migrator m) async {
+          await m.createAll();
+        },
+        onUpgrade: (Migrator m, int from, int to) async {
+          if (from < 2) {
+            await m.addColumn(notes, notes.isList);
+          }
+        },
+      );
 }
 
 LazyDatabase _openConnection() {

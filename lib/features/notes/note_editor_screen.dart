@@ -6,7 +6,7 @@ import '../../core/database/app_database.dart';
 import '../../Utilities/Generics/get_arguments.dart';
 import '../../Utilities/Dialog/cannot_share_empty_note_dialog.dart';
 import '../../Utilities/theme_utils.dart';
-
+import 'checklist_item.dart';
 
 class NoteEditorScreen extends ConsumerStatefulWidget {
   const NoteEditorScreen({super.key});
@@ -19,9 +19,12 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
   Note? _note;
   late final TextEditingController _titleController;
   late final TextEditingController _bodyController;
+  
+  bool _isList = false;
+  List<ChecklistItem> _checklistItems = [];
+  bool _showCompleted = false;
+
   bool _isInitialized = false;
-  /// Captured before dispose so we can still call deleteNote/updateNote
-  /// after the widget tree has deactivated the Riverpod ref.
   NotesViewModel? _viewModel;
 
   @override
@@ -33,8 +36,6 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
 
   @override
   void deactivate() {
-    // Capture the ViewModel while ref is still alive.
-    // By the time dispose() runs, ref is already dead.
     _viewModel = ref.read(notesViewModelProvider.notifier);
     _removeListeners();
     _saveOrDeleteNote();
@@ -54,18 +55,18 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     if (note == null || vm == null) return;
 
     final title = _titleController.text.trim();
-    final body = _bodyController.text.trim();
+    final body = _isList ? ChecklistItem.toJsonList(_checklistItems) : _bodyController.text.trim();
 
-    if (title.isEmpty && body.isEmpty) {
-      // Auto-delete empty notes
+    if (title.isEmpty && ((!_isList && body.isEmpty) || (_isList && _checklistItems.isEmpty))) {
       vm.deleteNote(note.id);
     } else {
       vm.updateNoteContent(
-            note.id,
-            title,
-            body,
-            note.colorTag,
-          );
+        note.id,
+        title,
+        body,
+        note.colorTag,
+        isList: _isList,
+      );
     }
   }
 
@@ -86,9 +87,15 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     ref.read(notesViewModelProvider.notifier).updateNoteContent(
           note.id,
           _titleController.text,
-          _bodyController.text,
+          _isList ? ChecklistItem.toJsonList(_checklistItems) : _bodyController.text,
           note.colorTag,
+          isList: _isList,
         );
+  }
+
+  void _onChecklistChanged() {
+    _onTextChanged();
+    setState(() {}); // trigger rebuild for UI
   }
 
   Future<Note> _createOrGetExistingNote() async {
@@ -97,34 +104,116 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     }
 
     final widgetNote = context.getArgument<Note>();
-    if (widgetNote != null) {
-      _note = widgetNote;
-      _titleController.text = widgetNote.title;
-      _bodyController.text = widgetNote.body;
-      _isInitialized = true;
-      _setupListeners();
-      return widgetNote;
-    }
-
     final notesViewModel = ref.read(notesViewModelProvider.notifier);
 
-    // Creating a new note locally
-    final newId = await notesViewModel.addNote('', '', 0);
-    if (!mounted) {
-      await notesViewModel.deleteNote(newId);
-      throw Exception('Widget disposed during note creation');
+    if (widgetNote != null) {
+      _isList = widgetNote.isList;
+      if (widgetNote.id == -1) {
+        // It's a new note, but we passed it to know if it's a list
+        final newId = await notesViewModel.addNote('', '', 0, isList: _isList);
+        if (!mounted) {
+          await notesViewModel.deleteNote(newId);
+          throw Exception('Widget disposed during note creation');
+        }
+        final newNote = await notesViewModel.getNoteById(newId);
+        _note = newNote;
+      } else {
+        _note = widgetNote;
+        _titleController.text = widgetNote.title;
+        if (_isList) {
+          _checklistItems = ChecklistItem.fromJsonList(widgetNote.body);
+        } else {
+          _bodyController.text = widgetNote.body;
+        }
+      }
+    } else {
+      // Creating a new note locally (default text)
+      final newId = await notesViewModel.addNote('', '', 0);
+      if (!mounted) {
+        await notesViewModel.deleteNote(newId);
+        throw Exception('Widget disposed during note creation');
+      }
+      final newNote = await notesViewModel.getNoteById(newId);
+      _note = newNote;
     }
 
-    final newNote = await notesViewModel.getNoteById(newId);
-    if (!mounted) {
-      await notesViewModel.deleteNote(newId);
-      throw Exception('Widget disposed during note loading');
-    }
-
-    _note = newNote;
     _isInitialized = true;
     _setupListeners();
-    return newNote!;
+    return _note!;
+  }
+
+  Widget _buildChecklist() {
+    final unchecked = _checklistItems.asMap().entries.where((e) => !e.value.isChecked).toList();
+    final checked = _checklistItems.asMap().entries.where((e) => e.value.isChecked).toList();
+
+    return ListView(
+      children: [
+        ...unchecked.map((entry) {
+          final index = entry.key;
+          final item = entry.value;
+          return _buildChecklistItem(index, item);
+        }),
+        ListTile(
+          leading: const Icon(Icons.add),
+          title: const Text('List item'),
+          onTap: () {
+            _checklistItems.add(ChecklistItem(text: ''));
+            _onChecklistChanged();
+          },
+        ),
+        if (checked.isNotEmpty) ...[
+          const Divider(),
+          ExpansionTile(
+            title: Text('${checked.length} Checked items'),
+            initiallyExpanded: _showCompleted,
+            onExpansionChanged: (val) {
+              setState(() {
+                _showCompleted = val;
+              });
+            },
+            children: checked.map((entry) {
+              final index = entry.key;
+              final item = entry.value;
+              return _buildChecklistItem(index, item);
+            }).toList(),
+          ),
+        ]
+      ],
+    );
+  }
+
+  Widget _buildChecklistItem(int index, ChecklistItem item) {
+    return ListTile(
+      leading: Checkbox(
+        value: item.isChecked,
+        onChanged: (val) {
+          _checklistItems[index] = item.copyWith(isChecked: val);
+          _onChecklistChanged();
+        },
+      ),
+      title: TextFormField(
+        initialValue: item.text,
+        decoration: const InputDecoration(
+          border: InputBorder.none,
+          isDense: true,
+        ),
+        style: TextStyle(
+          decoration: item.isChecked ? TextDecoration.lineThrough : null,
+          color: item.isChecked ? Theme.of(context).colorScheme.outline : null,
+        ),
+        onChanged: (val) {
+          _checklistItems[index] = item.copyWith(text: val);
+          _onChecklistChanged();
+        },
+      ),
+      trailing: IconButton(
+        icon: const Icon(Icons.close, size: 18),
+        onPressed: () {
+          _checklistItems.removeAt(index);
+          _onChecklistChanged();
+        },
+      ),
+    );
   }
 
   @override
@@ -179,7 +268,10 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
           ),
           IconButton(
             onPressed: () async {
-              final text = '${_titleController.text}\n\n${_bodyController.text}'.trim();
+              final bodyText = _isList 
+                  ? _checklistItems.map((e) => '${e.isChecked ? '[x]' : '[ ]'} ${e.text}').join('\n')
+                  : _bodyController.text;
+              final text = '${_titleController.text}\n\n$bodyText'.trim();
               if (text.isEmpty) {
                 await showCannotShareEmptyNoteDialog(context);
               } else {
@@ -209,15 +301,17 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
                   ),
                   const Divider(),
                   Expanded(
-                    child: TextField(
-                      controller: _bodyController,
-                      keyboardType: TextInputType.multiline,
-                      maxLines: null,
-                      decoration: const InputDecoration(
-                        hintText: 'Start typing your note...',
-                        border: InputBorder.none,
-                      ),
-                    ),
+                    child: _isList
+                        ? _buildChecklist()
+                        : TextField(
+                            controller: _bodyController,
+                            keyboardType: TextInputType.multiline,
+                            maxLines: null,
+                            decoration: const InputDecoration(
+                              hintText: 'Start typing your note...',
+                              border: InputBorder.none,
+                            ),
+                          ),
                   ),
                 ],
               ),
@@ -259,8 +353,9 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
                         ref.read(notesViewModelProvider.notifier).updateNoteContent(
                           _note!.id,
                           _titleController.text,
-                          _bodyController.text,
+                          _isList ? ChecklistItem.toJsonList(_checklistItems) : _bodyController.text,
                           index,
+                          isList: _isList,
                         );
                       },
                       child: Container(

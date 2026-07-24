@@ -5,6 +5,7 @@ import 'package:tick_notes/core/onboarding/onboarding_service.dart';
 import 'package:tick_notes/features/notes/notes_list_screen.dart';
 import 'package:tick_notes/features/todo/todo_list_screen.dart';
 import 'package:tick_notes/features/pomodoro/pomodoro_screen.dart';
+import 'package:tick_notes/features/pomodoro/pomodoro_view_model.dart';
 import 'package:tick_notes/features/analytics/analytics_screen.dart';
 import '../../core/widgets/lazy_indexed_stack.dart';
 
@@ -55,6 +56,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Force initialize the PomodoroViewModel so that any background timers 
+    // are instantly recovered from SharedPreferences when the app starts, 
+    // without waiting for the user to visit the Focus tab.
+    ref.read(pomodoroViewModelProvider);
+
     return PopScope(
       canPop: !OnboardingService.instance.isShowing,
       onPopInvokedWithResult: (didPop, result) {

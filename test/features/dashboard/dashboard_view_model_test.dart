@@ -63,6 +63,7 @@ void main() {
         title: 'Existing Note',
         body: 'Content',
         colorTag: 0,
+        isList: false,
         updatedAt: DateTime.now(),
       );
       when(() => mockNotesRepo.getAll())

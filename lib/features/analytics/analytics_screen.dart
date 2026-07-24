@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'analytics_view_model.dart';
-import '../../Utilities/theme_utils.dart';
 import 'dart:math';
+import 'widgets/daily_timeline_widget.dart';
 
 class AnalyticsScreen extends ConsumerStatefulWidget {
   const AnalyticsScreen({super.key});
@@ -210,13 +210,6 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                           fontWeight: FontWeight.bold,
                         ),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Total focus duration: ${_selectedDay!.totalMinutes} minutes',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.outline,
-                        ),
-                  ),
                   const SizedBox(height: 16),
                   if (_selectedDay!.sessions.isEmpty)
                     Card(
@@ -228,46 +221,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                       ),
                     )
                   else
-                    ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: _selectedDay!.sessions.length,
-                      itemBuilder: (context, index) {
-                        final session = _selectedDay!.sessions[index];
-                        final isPomodoro = session.mode == 'pomodoro';
-                        final color = getNoteColor(context, isPomodoro ? 1 : 3); // red for pomodoro, blue for open
-
-                        final startTimeStr = '${session.startTime.hour.toString().padLeft(2, '0')}:${session.startTime.minute.toString().padLeft(2, '0')}';
-                        final endTimeStr = '${session.endTime.hour.toString().padLeft(2, '0')}:${session.endTime.minute.toString().padLeft(2, '0')}';
-
-                        return Card(
-                          color: color,
-                          elevation: 0,
-                          margin: const EdgeInsets.symmetric(vertical: 4),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            side: BorderSide(
-                              color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.3),
-                            ),
-                          ),
-                          child: ListTile(
-                            leading: Icon(
-                              isPomodoro ? Icons.work : Icons.timer,
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
-                            ),
-                            title: Text(
-                              isPomodoro ? 'Pomodoro Focus' : 'Open Focus',
-                              style: const TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            subtitle: Text('Time: $startTimeStr - $endTimeStr'),
-                            trailing: Text(
-                              '${session.durationMinutes} mins',
-                              style: const TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
+                    DailyTimelineWidget(dayStats: _selectedDay!),
                 ],
               ],
             ),

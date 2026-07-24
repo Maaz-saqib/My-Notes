@@ -16,6 +16,6 @@ Color getNoteColor(BuildContext context, int colorTag) {
     case 6:
       return isDark ? const Color(0xFF331D42) : const Color(0xFFF3E5F5); // Soft Purple
     default:
-      return Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3); // Default
+      return isDark ? Colors.black : Colors.white; // No Color (default)
   }
 }
