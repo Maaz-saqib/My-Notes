@@ -26,10 +26,10 @@ class ChecklistItem {
     };
   }
 
-  factory ChecklistItem.fromMap(Map<String, dynamic> map) {
+  factory ChecklistItem.fromMap(Map<dynamic, dynamic> map) {
     return ChecklistItem(
-      text: map['text'] ?? '',
-      isChecked: map['isChecked'] ?? false,
+      text: map['text']?.toString() ?? '',
+      isChecked: map['isChecked'] == true,
     );
   }
 
@@ -40,8 +40,12 @@ class ChecklistItem {
   static List<ChecklistItem> fromJsonList(String jsonString) {
     if (jsonString.isEmpty) return [];
     try {
-      final List<dynamic> parsed = json.decode(jsonString);
-      return parsed.map((e) => ChecklistItem.fromMap(e as Map<String, dynamic>)).toList();
+      final dynamic parsed = json.decode(jsonString);
+      if (parsed is! List) return [];
+      return parsed
+          .whereType<Map>()
+          .map((e) => ChecklistItem.fromMap(e))
+          .toList();
     } catch (e) {
       return [];
     }

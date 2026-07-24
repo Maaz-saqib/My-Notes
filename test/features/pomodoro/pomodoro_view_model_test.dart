@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tick_notes/core/database/app_database.dart';
 import 'package:tick_notes/core/notifications/notification_service.dart';
 import 'package:tick_notes/features/pomodoro/pomodoro_repository.dart';
@@ -22,10 +23,12 @@ void main() {
   late ProviderContainer container;
 
   setUpAll(() {
+    TestWidgetsFlutterBinding.ensureInitialized();
     registerFallbackValue(FakePomodoroSessionsCompanion());
   });
 
   setUp(() {
+    SharedPreferences.setMockInitialValues({});
     mockRepo = MockPomodoroRepository();
     mockNotifications = MockNotificationService();
 

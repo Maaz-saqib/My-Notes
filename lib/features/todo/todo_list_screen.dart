@@ -221,13 +221,15 @@ class _TodoListScreenState extends ConsumerState<TodoListScreen>
                     ),
                   );
                 },
-                child: AnimatedTodoCard(
-                  todo: todo,
-                  cardColor: cardColor,
-                  formatDueDate: _formatDueDate,
-                  onToggle: () {
-                    ref.read(todoViewModelProvider.notifier).toggleComplete(todo);
-                  },
+                child: RepaintBoundary(
+                  child: AnimatedTodoCard(
+                    todo: todo,
+                    cardColor: cardColor,
+                    formatDueDate: _formatDueDate,
+                    onToggle: () {
+                      ref.read(todoViewModelProvider.notifier).toggleComplete(todo);
+                    },
+                  ),
                 ),
               );
             },

@@ -98,32 +98,40 @@ class _TodoEditorScreenState extends ConsumerState<TodoEditorScreen> {
       );
     }
 
-    if (_todo != null) {
-      // Update (passing 0 for colorTag)
-      await ref.read(todoViewModelProvider.notifier).updateTodo(
-            id: _todo!.id,
-            title: title,
-            dueDate: finalDueDate,
-            colorTag: 0,
-            isCompleted: _todo!.isCompleted,
-            hasReminder: _hasReminder,
-            hasAlarm: _hasAlarm,
-            alarmSound: _alarmSound,
-          );
-    } else {
-      // Add (passing 0 for colorTag)
-      await ref.read(todoViewModelProvider.notifier).addTodo(
-            title: title,
-            dueDate: finalDueDate,
-            colorTag: 0,
-            hasReminder: _hasReminder,
-            hasAlarm: _hasAlarm,
-            alarmSound: _alarmSound,
-          );
-    }
+    try {
+      if (_todo != null) {
+        // Update (passing 0 for colorTag)
+        await ref.read(todoViewModelProvider.notifier).updateTodo(
+              id: _todo!.id,
+              title: title,
+              dueDate: finalDueDate,
+              colorTag: 0,
+              isCompleted: _todo!.isCompleted,
+              hasReminder: _hasReminder,
+              hasAlarm: _hasAlarm,
+              alarmSound: _alarmSound,
+            );
+      } else {
+        // Add (passing 0 for colorTag)
+        await ref.read(todoViewModelProvider.notifier).addTodo(
+              title: title,
+              dueDate: finalDueDate,
+              colorTag: 0,
+              hasReminder: _hasReminder,
+              hasAlarm: _hasAlarm,
+              alarmSound: _alarmSound,
+            );
+      }
 
-    if (mounted) {
-      Navigator.of(context).pop();
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to save task. Please try again.')),
+        );
+      }
     }
   }
 

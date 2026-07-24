@@ -11,17 +11,52 @@ import 'package:tick_notes/core/splash/home_page.dart';
 void main() {
   final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
 
-  // Hold the native splash visible until AnimatedSplashScreen signals it to go away.
-  // This closes the white-screen gap between native splash and Flutter first frame.
+  // Catch synchronous Flutter framework errors
+  FlutterError.onError = (details) {
+    FlutterError.presentError(details);
+    debugPrint('Global Flutter Error: ${details.exceptionAsString()}');
+  };
+
+  // Catch asynchronous errors in the root isolate
+  WidgetsBinding.instance.platformDispatcher.onError = (error, stack) {
+    debugPrint('Global Async Error: $error');
+    debugPrint(stack.toString());
+    return true; // Handled
+  };
+
+  // Custom UI fallback error widget instead of red/grey screen
+  ErrorWidget.builder = (FlutterErrorDetails details) {
+    return Material(
+      color: Colors.transparent,
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 48),
+              const SizedBox(height: 12),
+              const Text(
+                'Something went wrong displaying this section.',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  };
+
+  // Hold native splash visible until Dashboard signals it to go away
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
-  // Initialize NotificationService asynchronously in the background so it doesn't block startup
+  // Initialize NotificationService asynchronously in the background
   NotificationService.instance.init().catchError((e, stack) {
     debugPrint('Failed to initialize NotificationService: $e');
     debugPrint(stack.toString());
   });
-
-  // NotificationService init is already above.
 
   runApp(const ProviderScope(child: MyApp()));
 }

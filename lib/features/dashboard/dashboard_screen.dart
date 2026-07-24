@@ -14,11 +14,17 @@ class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
 
   @override
-  ConsumerState<DashboardScreen> createState() => _DashboardScreenState();
+  ConsumerState<DashboardScreen> createState() => DashboardScreenState();
 }
 
-class _DashboardScreenState extends ConsumerState<DashboardScreen> {
+class DashboardScreenState extends ConsumerState<DashboardScreen> {
   int _currentIndex = 0;
+
+  void selectTab(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+  }
 
   final GlobalKey notesTabKey = GlobalKey();
   final GlobalKey tasksTabKey = GlobalKey();
@@ -39,7 +45,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     ];
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      FlutterNativeSplash.remove();
+      try {
+        FlutterNativeSplash.remove();
+      } catch (_) {}
       final shouldShow = await ref.read(dashboardViewModelProvider.notifier).shouldShowOnboarding();
       if (!shouldShow) return;
 
@@ -78,11 +86,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         ),
         bottomNavigationBar: NavigationBar(
           selectedIndex: _currentIndex,
-          onDestinationSelected: (index) {
-            setState(() {
-              _currentIndex = index;
-            });
-          },
+          onDestinationSelected: selectTab,
           destinations: [
             NavigationDestination(
               key: notesTabKey,

@@ -50,23 +50,27 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
   }
 
   void _saveOrDeleteNote() {
-    final note = _note;
-    final vm = _viewModel;
-    if (note == null || vm == null) return;
+    try {
+      final note = _note;
+      final vm = _viewModel;
+      if (note == null || vm == null) return;
 
-    final title = _titleController.text.trim();
-    final body = _isList ? ChecklistItem.toJsonList(_checklistItems) : _bodyController.text.trim();
+      final title = _titleController.text.trim();
+      final body = _isList ? ChecklistItem.toJsonList(_checklistItems) : _bodyController.text.trim();
 
-    if (title.isEmpty && ((!_isList && body.isEmpty) || (_isList && _checklistItems.isEmpty))) {
-      vm.deleteNote(note.id);
-    } else {
-      vm.updateNoteContent(
-        note.id,
-        title,
-        body,
-        note.colorTag,
-        isList: _isList,
-      );
+      if (title.isEmpty && ((!_isList && body.isEmpty) || (_isList && _checklistItems.isEmpty))) {
+        vm.deleteNote(note.id);
+      } else {
+        vm.updateNoteContent(
+          note.id,
+          title,
+          body,
+          note.colorTag,
+          isList: _isList,
+        );
+      }
+    } catch (e) {
+      debugPrint('NoteEditorScreen._saveOrDeleteNote error: $e');
     }
   }
 

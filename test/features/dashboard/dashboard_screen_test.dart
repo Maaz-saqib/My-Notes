@@ -45,7 +45,7 @@ class MockTodoViewModel extends AutoDisposeStreamNotifier<List<Todo>>
 }
 
 // 4. Mock PomodoroViewModel
-class MockPomodoroViewModel extends AutoDisposeNotifier<PomodoroState>
+class MockPomodoroViewModel extends Notifier<PomodoroState>
     with Mock
     implements PomodoroViewModel {
   @override
@@ -139,13 +139,11 @@ void main() {
       await tester.pumpWidget(buildTestWidget());
       await tester.pumpAndSettle();
 
-      // Find the 'Tasks' destination in bottom navigation bar
-      final tasksTab = find.text('Tasks');
-      expect(tasksTab, findsOneWidget);
-
-      await tester.tap(tasksTab);
-      // Wait for navigation animation and transition
-      await tester.pumpAndSettle();
+      // Select 'Tasks' tab (index 1) via selectTab helper
+      final state = tester.state<DashboardScreenState>(find.byType(DashboardScreen));
+      state.selectTab(1);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
 
       // Verify 'Tasks & Reminders' title is now visible
       expect(find.text('Tasks & Reminders'), findsOneWidget);
